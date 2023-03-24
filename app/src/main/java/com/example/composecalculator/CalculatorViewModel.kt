@@ -23,13 +23,13 @@ class CalculatorViewModel : ViewModel() {
     private fun performDeletion() {
         when {
             state.number2.isNotBlank() -> state = state.copy(
-                number2 = state.number2.dropLast(1)
+                number2 = state.number2.dropLast(1).dropLastWhile { it == '.' }
             )
             state.operation != null -> state = state.copy(
                 operation = null
             )
             state.number1.isNotBlank() -> state = state.copy(
-                number1 = state.number1.dropLast(1)
+                number1 = state.number1.dropLast(1).dropLastWhile { it == '.' }
             )
         }
     }
@@ -46,7 +46,7 @@ class CalculatorViewModel : ViewModel() {
                 null -> return
             }
             state = state.copy(
-                number1 = result.toString().take(15),
+                number1 = result.toString().take(15).removeTrailingZeroes(),
                 number2 = "",
                 operation = null
             )
@@ -95,4 +95,11 @@ class CalculatorViewModel : ViewModel() {
     companion object {
         private const val MAX_NUM_LENGTH = 8
     }
+}
+
+fun String.removeTrailingZeroes(): String {
+    if (contains(".")) {
+        return dropLastWhile { it == '0'}.dropLastWhile { it == '.' }
+    }
+    return this
 }
