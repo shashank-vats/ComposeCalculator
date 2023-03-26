@@ -1,5 +1,8 @@
-package com.example.composecalculator
+package com.example.composecalculator.calculator
 
+import com.example.composecalculator.calculator.models.CalculatorDisplayItem
+import com.example.composecalculator.calculator.models.CalculatorOperand
+import com.example.composecalculator.calculator.models.CalculatorOperator
 import java.lang.IllegalArgumentException
 import java.util.Stack
 

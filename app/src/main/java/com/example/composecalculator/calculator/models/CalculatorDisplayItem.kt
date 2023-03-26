@@ -1,4 +1,4 @@
-package com.example.composecalculator
+package com.example.composecalculator.calculator.models
 
 sealed class CalculatorDisplayItem(val displayStr: String) {
     object AddSymbol : CalculatorDisplayItem("+"), CalculatorOperator, CalculatorSign

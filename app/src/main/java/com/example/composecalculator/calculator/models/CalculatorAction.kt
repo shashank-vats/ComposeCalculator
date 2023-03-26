@@ -1,4 +1,4 @@
-package com.example.composecalculator
+package com.example.composecalculator.calculator.models
 
 sealed class CalculatorAction {
     data class Number(val number: Int): CalculatorAction()

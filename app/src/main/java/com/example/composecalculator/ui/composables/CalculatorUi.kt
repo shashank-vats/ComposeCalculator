@@ -1,4 +1,4 @@
-package com.example.composecalculator
+package com.example.composecalculator.ui.composables
 
 import android.widget.Toast
 import androidx.compose.foundation.background
@@ -19,13 +19,17 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.composecalculator.calculator.models.CalculatorAction
+import com.example.composecalculator.calculator.models.CalculatorDisplayItem
+import com.example.composecalculator.calculator.models.CalculatorState
+import com.example.composecalculator.calculator.models.toDisplayString
 import com.example.composecalculator.ui.theme.ComposeCalculatorTheme
 import com.example.composecalculator.ui.theme.LightGray
 import com.example.composecalculator.ui.theme.MediumGray
 import com.example.composecalculator.ui.theme.Orange
 
 @Composable
-fun Calculator(
+fun CalculatorUi(
     state: CalculatorState,
     modifier: Modifier = Modifier,
     buttonSpacing: Dp = 8.dp,
@@ -74,7 +78,7 @@ fun Calculator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
-                CalculatorButton(symbol = "AC",
+                CalculatorButtonUi(symbol = "AC",
                     modifier = Modifier
                         .background(LightGray)
                         .aspectRatio(1f)
@@ -82,7 +86,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Clear)
                     })
-                CalculatorButton(symbol = "(",
+                CalculatorButtonUi(symbol = "(",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -90,7 +94,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Parentheses(CalculatorDisplayItem.LeftParentheses))
                     })
-                CalculatorButton(symbol = ")",
+                CalculatorButtonUi(symbol = ")",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -98,7 +102,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Parentheses(CalculatorDisplayItem.RightParentheses))
                     })
-                CalculatorButton(symbol = "Del",
+                CalculatorButtonUi(symbol = "Del",
                     modifier = Modifier
                         .background(LightGray)
                         .aspectRatio(1f)
@@ -113,7 +117,7 @@ fun Calculator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
-                CalculatorButton(symbol = "7",
+                CalculatorButtonUi(symbol = "7",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -121,7 +125,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(7))
                     })
-                CalculatorButton(symbol = "8",
+                CalculatorButtonUi(symbol = "8",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -129,7 +133,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(8))
                     })
-                CalculatorButton(symbol = "9",
+                CalculatorButtonUi(symbol = "9",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -137,7 +141,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(9))
                     })
-                CalculatorButton(symbol = "/",
+                CalculatorButtonUi(symbol = "/",
                     modifier = Modifier
                         .background(Orange)
                         .aspectRatio(1f)
@@ -150,7 +154,7 @@ fun Calculator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
-                CalculatorButton(symbol = "4",
+                CalculatorButtonUi(symbol = "4",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -158,7 +162,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(4))
                     })
-                CalculatorButton(symbol = "5",
+                CalculatorButtonUi(symbol = "5",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -166,7 +170,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(5))
                     })
-                CalculatorButton(symbol = "6",
+                CalculatorButtonUi(symbol = "6",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -175,7 +179,7 @@ fun Calculator(
                         onAction(CalculatorAction.Number(6))
                     })
 
-                CalculatorButton(symbol = "x",
+                CalculatorButtonUi(symbol = "x",
                     modifier = Modifier
                         .background(Orange)
                         .aspectRatio(1f)
@@ -188,7 +192,7 @@ fun Calculator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
-                CalculatorButton(symbol = "1",
+                CalculatorButtonUi(symbol = "1",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -196,7 +200,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(1))
                     })
-                CalculatorButton(symbol = "2",
+                CalculatorButtonUi(symbol = "2",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -204,7 +208,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(2))
                     })
-                CalculatorButton(symbol = "3",
+                CalculatorButtonUi(symbol = "3",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -212,7 +216,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(3))
                     })
-                CalculatorButton(symbol = "-",
+                CalculatorButtonUi(symbol = "-",
                     modifier = Modifier
                         .background(Orange)
                         .aspectRatio(1f)
@@ -225,7 +229,7 @@ fun Calculator(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
             ) {
-                CalculatorButton(symbol = "0",
+                CalculatorButtonUi(symbol = "0",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -233,7 +237,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Number(0))
                     })
-                CalculatorButton(symbol = ".",
+                CalculatorButtonUi(symbol = ".",
                     modifier = Modifier
                         .background(Color.DarkGray)
                         .aspectRatio(1f)
@@ -241,7 +245,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Decimal)
                     })
-                CalculatorButton(symbol = "=",
+                CalculatorButtonUi(symbol = "=",
                     modifier = Modifier
                         .background(Orange)
                         .aspectRatio(1f)
@@ -249,7 +253,7 @@ fun Calculator(
                     onClick = {
                         onAction(CalculatorAction.Calculate)
                     })
-                CalculatorButton(symbol = "+",
+                CalculatorButtonUi(symbol = "+",
                     modifier = Modifier
                         .background(Orange)
                         .aspectRatio(1f)
@@ -266,7 +270,7 @@ fun Calculator(
 @Composable
 fun CalculatorPreview() {
     ComposeCalculatorTheme {
-        Calculator(
+        CalculatorUi(
             state = CalculatorState(mutableListOf(), ""),
             onAction = {},
             modifier = Modifier

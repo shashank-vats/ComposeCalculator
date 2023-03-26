@@ -1,4 +1,4 @@
-package com.example.composecalculator
+package com.example.composecalculator.calculator.models
 
 data class CalculatorState(
     val displayTokens: List<CalculatorDisplayItem> = listOf(),
