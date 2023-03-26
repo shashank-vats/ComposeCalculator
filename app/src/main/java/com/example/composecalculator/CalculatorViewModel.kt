@@ -4,92 +4,139 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.getValue
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class CalculatorViewModel : ViewModel() {
     var state by mutableStateOf(CalculatorState())
         private set
 
     fun onAction(action: CalculatorAction) {
+        state = state.copy(error = null)
         when (action) {
             is CalculatorAction.Number -> enterNumber(action.number)
             is CalculatorAction.Decimal -> enterDecimal()
             is CalculatorAction.Clear -> state = CalculatorState()
-            is CalculatorAction.Operation -> enterOperation(action.operation)
+            is CalculatorAction.Operation -> enterOperation(
+                (action.operation as? CalculatorDisplayItem)?.displayStr?.toCalculatorDisplayItem()
+            )
             is CalculatorAction.Calculate -> performCalculation()
             is CalculatorAction.Delete -> performDeletion()
         }
     }
 
     private fun performDeletion() {
-        when {
-            state.number2.isNotBlank() -> state = state.copy(
-                number2 = state.number2.dropLast(1).dropLastWhile { it == '.' }
-            )
-            state.operation != null -> state = state.copy(
-                operation = null
-            )
-            state.number1.isNotBlank() -> state = state.copy(
-                number1 = state.number1.dropLast(1).dropLastWhile { it == '.' }
-            )
+        viewModelScope.launch(Dispatchers.IO) {
+            if (state.currentToken.isNotEmpty()) {
+                state = state.copy(
+                    currentToken = state.currentToken.dropLast(1)
+                )
+            } else if (state.displayTokens.isNotEmpty()) {
+                val lastDisplayToken = state.displayTokens.last()
+                val displayTokens = state.displayTokens.dropLast(1).toMutableList()
+                val newToken =
+                    if (lastDisplayToken is CalculatorDisplayItem.Number && (lastDisplayToken.displayStr == "Infinity" || lastDisplayToken.displayStr == "-Infinity")) {
+                        ""
+                    } else {
+                        lastDisplayToken.displayStr.dropLast(1)
+                    }
+                if (newToken.isNotEmpty()) {
+                    displayTokens.add(CalculatorDisplayItem.Number(newToken))
+                }
+                state = state.copy(
+                    displayTokens = displayTokens
+                )
+            }
         }
     }
 
     private fun performCalculation() {
-        val number1 = state.number1.toDoubleOrNull()
-        val number2 = state.number2.toDoubleOrNull()
-        if (number1 != null && number2 != null) {
-            val result = when (state.operation) {
-                is CalculatorOperation.Add -> number1 + number2
-                is CalculatorOperation.Subtract -> number1 - number2
-                is CalculatorOperation.Multiply -> number1 * number2
-                is CalculatorOperation.Divide -> number1 / number2
-                null -> return
+        viewModelScope.launch(Dispatchers.IO) {
+            val tokenList = state.displayTokens.toMutableList()
+            if (state.currentToken.isNotEmpty()) {
+                val currentToken = state.currentToken.toCalculatorDisplayItem() ?: return@launch
+                tokenList.add(currentToken)
             }
-            state = state.copy(
-                number1 = result.toString().take(15).removeTrailingZeroes(),
-                number2 = "",
-                operation = null
-            )
+            try {
+                val result =
+                    CalculatorUtils.evaluateInfix(tokenList).toString().removeTrailingZeroes()
+                        .toCalculatorDisplayItem() ?: return@launch
+                state = state.copy(
+                    displayTokens = mutableListOf(result), currentToken = ""
+                )
+            } catch (ex: java.lang.IllegalArgumentException) {
+                state = state.copy(
+                    error = ex.message
+                )
+            } catch (ex: java.lang.Exception) {
+                state = state.copy(
+                    error = "Some error occurred!"
+                )
+            }
         }
     }
 
-    private fun enterOperation(operation: CalculatorOperation) {
-        if (state.number1.isNotBlank()) {
-            state = state.copy(operation = operation)
+    private fun enterOperation(operation: CalculatorDisplayItem?) {
+        viewModelScope.launch(Dispatchers.IO) {
+            if (operation == null) return@launch
+            val tokensList = state.displayTokens.toMutableList()
+            if (state.currentToken.isNotEmpty()) {
+                val currentToken = state.currentToken.toCalculatorDisplayItem()
+                if (currentToken != null) {
+                    tokensList.add(currentToken)
+                }
+                tokensList.add(operation)
+                state = state.copy(
+                    displayTokens = tokensList, currentToken = ""
+                )
+            } else {
+                val lastToken = tokensList.lastOrNull()
+                if (lastToken == null) {
+                    if (operation is CalculatorSign) {
+                        state = state.copy(
+                            currentToken = operation.displayStr
+                        )
+                    }
+                    return@launch
+                }
+                if (lastToken is CalculatorOperator) return@launch
+                tokensList.add(operation)
+                state = state.copy(
+                    displayTokens = tokensList
+                )
+            }
         }
     }
 
     private fun enterDecimal() {
-        if (state.operation == null && !state.number1.contains(".") && state.number1.isNotBlank()) {
-            state = state.copy(
-                number1 = state.number1 + "."
-            )
-            return
-        }
-        if (!state.number2.contains(".") && state.number2.isNotBlank()) {
-            state = state.copy(
-                number2 = state.number2 + "."
-            )
-            return
+        viewModelScope.launch(Dispatchers.IO) {
+            if (state.currentToken.isEmpty() && state.displayTokens.lastOrNull() is CalculatorDisplayItem.Number) {
+                val lastToken = state.displayTokens.last()
+                if (lastToken.displayStr.contains(".")) return@launch
+                val tokensList = state.displayTokens.dropLast(1)
+                state = state.copy(
+                    displayTokens = tokensList, currentToken = lastToken.displayStr + "."
+                )
+            } else if (!state.currentToken.contains(".")) {
+                state = state.copy(
+                    currentToken = state.currentToken + "."
+                )
+            }
         }
     }
 
     private fun enterNumber(number: Int) {
-        if (state.operation == null) {
-            if (state.number1.length >= MAX_NUM_LENGTH) {
-                return
+        viewModelScope.launch(Dispatchers.IO) {
+            val lastNum = state.currentToken.filter {
+                it.toString().toCalculatorDisplayItem() !is CalculatorOperator && it != '.'
             }
-            state = state.copy(
-                number1 = state.number1 + number
-            )
-            return
+            if (lastNum.length < MAX_NUM_LENGTH) {
+                state = state.copy(
+                    currentToken = state.currentToken + number.toString()
+                )
+            }
         }
-        if (state.number2.length >= MAX_NUM_LENGTH) {
-            return
-        }
-        state = state.copy(
-            number2 = state.number2 + number
-        )
     }
 
     companion object {
@@ -99,7 +146,21 @@ class CalculatorViewModel : ViewModel() {
 
 fun String.removeTrailingZeroes(): String {
     if (contains(".")) {
-        return dropLastWhile { it == '0'}.dropLastWhile { it == '.' }
+        return dropLastWhile { it == '0' }.dropLastWhile { it == '.' }
     }
     return this
+}
+
+fun String.toCalculatorDisplayItem(): CalculatorDisplayItem? {
+    return when (this) {
+        "+" -> CalculatorDisplayItem.AddSymbol
+        "-" -> CalculatorDisplayItem.MinusSymbol
+        "x" -> CalculatorDisplayItem.MultiplySymbol
+        "/" -> CalculatorDisplayItem.DivisionSymbol
+        else -> {
+            val num = toDoubleOrNull()
+            if (num == null) null
+            else CalculatorDisplayItem.Number(this)
+        }
+    }
 }

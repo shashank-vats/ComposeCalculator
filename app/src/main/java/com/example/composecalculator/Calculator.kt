@@ -1,12 +1,16 @@
 package com.example.composecalculator
 
+import android.util.Log
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
@@ -32,8 +36,14 @@ fun Calculator(
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.spacedBy(buttonSpacing)
         ) {
+            if (state.error != null) {
+                val context = LocalContext.current
+                LaunchedEffect(key1 = state.error) {
+                    Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
+                }
+            }
             Text(
-                text = state.number1 + (state.operation?.symbol ?: "") + state.number2,
+                text = state.toDisplayString(),
                 textAlign = TextAlign.End,
                 modifier = Modifier
                     .fillMaxWidth()
@@ -69,7 +79,7 @@ fun Calculator(
                         .aspectRatio(1f)
                         .weight(1f),
                     onClick = {
-                        onAction(CalculatorAction.Operation(CalculatorOperation.Divide))
+                        onAction(CalculatorAction.Operation(CalculatorDisplayItem.DivisionSymbol))
                     })
             }
             Row(
@@ -106,7 +116,7 @@ fun Calculator(
                         .aspectRatio(1f)
                         .weight(1f),
                     onClick = {
-                        onAction(CalculatorAction.Operation(CalculatorOperation.Multiply))
+                        onAction(CalculatorAction.Operation(CalculatorDisplayItem.MultiplySymbol))
                     })
             }
             Row(
@@ -143,7 +153,7 @@ fun Calculator(
                         .aspectRatio(1f)
                         .weight(1f),
                     onClick = {
-                        onAction(CalculatorAction.Operation(CalculatorOperation.Subtract))
+                        onAction(CalculatorAction.Operation(CalculatorDisplayItem.MinusSymbol))
                     })
             }
             Row(
@@ -180,7 +190,7 @@ fun Calculator(
                         .aspectRatio(1f)
                         .weight(1f),
                     onClick = {
-                        onAction(CalculatorAction.Operation(CalculatorOperation.Add))
+                        onAction(CalculatorAction.Operation(CalculatorDisplayItem.AddSymbol))
                     })
             }
             Row(
@@ -221,7 +231,7 @@ fun Calculator(
 fun CalculatorPreview() {
     ComposeCalculatorTheme {
         Calculator(
-            state = CalculatorState("", "", null),
+            state = CalculatorState(mutableListOf(), ""),
             onAction = {},
             modifier = Modifier
                 .fillMaxSize()
