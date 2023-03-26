@@ -3,9 +3,12 @@ package com.example.composecalculator
 import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -32,6 +35,7 @@ fun Calculator(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .fillMaxHeight()
                 .align(Alignment.BottomCenter),
             verticalArrangement = Arrangement.spacedBy(buttonSpacing)
         ) {
@@ -41,17 +45,31 @@ fun Calculator(
                     Toast.makeText(context, state.error, Toast.LENGTH_SHORT).show()
                 }
             }
-            Text(
-                text = state.toDisplayString(),
-                textAlign = TextAlign.End,
+            val scrollState = rememberScrollState()
+            val text = remember(state) {
+                state.toDisplayString()
+            }
+            LaunchedEffect(key1 = text) {
+                scrollState.scrollTo(scrollState.maxValue)
+            }
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 32.dp),
-                fontWeight = FontWeight.Light,
-                fontSize = 80.sp,
-                color = Color.White,
-                maxLines = 2
-            )
+                    .fillMaxHeight()
+                    .weight(1f)
+                    .padding(vertical = 32.dp)
+                    .verticalScroll(scrollState),
+                verticalArrangement = Arrangement.Bottom
+            ) {
+                Text(
+                    text = text,
+                    textAlign = TextAlign.End,
+                    modifier = Modifier.fillMaxWidth(),
+                    fontWeight = FontWeight.Light,
+                    fontSize = 80.sp,
+                    color = Color.White
+                )
+            }
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(buttonSpacing)
@@ -87,7 +105,9 @@ fun Calculator(
                         .weight(1f),
                     onClick = {
                         onAction(CalculatorAction.Delete)
-                    })
+                    }) {
+                    onAction(CalculatorAction.Clear)
+                }
             }
             Row(
                 modifier = Modifier.fillMaxWidth(),
