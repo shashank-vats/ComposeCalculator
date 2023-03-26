@@ -1,5 +1,6 @@
 package com.example.composecalculator
 
+import java.lang.IllegalArgumentException
 import java.util.Stack
 
 object CalculatorUtils {
@@ -25,7 +26,15 @@ object CalculatorUtils {
                     while (opStack.isNotEmpty() && opStack.peek() is CalculatorOperator && opStack.peek().precedence >= token.precedence) {
                         outputList.add(opStack.pop())
                     }
-                    opStack.add(token)
+                    opStack.push(token)
+                }
+                is CalculatorDisplayItem.LeftParentheses -> {
+                    opStack.push(token)
+                }
+                is CalculatorDisplayItem.RightParentheses -> {
+                    while (opStack.isNotEmpty() && opStack.peek() !is CalculatorDisplayItem.LeftParentheses) {
+                        outputList.add(opStack.pop())
+                    }
                 }
             }
         }
@@ -44,7 +53,7 @@ object CalculatorUtils {
                 }
                 is CalculatorDisplayItem.AddSymbol -> {
                     if (operandStack.size < 2) {
-                        throw java.lang.IllegalArgumentException("Expression not correct!")
+                        throw IllegalArgumentException("Expression not correct!")
                     }
                     val operand2 = operandStack.pop()
                     val operand1 = operandStack.pop()
@@ -54,7 +63,7 @@ object CalculatorUtils {
                 }
                 is CalculatorDisplayItem.MinusSymbol -> {
                     if (operandStack.size < 2) {
-                        throw java.lang.IllegalArgumentException("Expression not correct!")
+                        throw IllegalArgumentException("Expression not correct!")
                     }
                     val operand2 = operandStack.pop()
                     val operand1 = operandStack.pop()
@@ -64,7 +73,7 @@ object CalculatorUtils {
                 }
                 is CalculatorDisplayItem.MultiplySymbol -> {
                     if (operandStack.size < 2) {
-                        throw java.lang.IllegalArgumentException("Expression not correct!")
+                        throw IllegalArgumentException("Expression not correct!")
                     }
                     val operand2 = operandStack.pop()
                     val operand1 = operandStack.pop()
@@ -74,13 +83,16 @@ object CalculatorUtils {
                 }
                 is CalculatorDisplayItem.DivisionSymbol -> {
                     if (operandStack.size < 2) {
-                        throw java.lang.IllegalArgumentException("Expression not correct!")
+                        throw IllegalArgumentException("Expression not correct!")
                     }
                     val operand2 = operandStack.pop()
                     val operand1 = operandStack.pop()
                     if (operand1 != null && operand2 != null) {
                         operandStack.push(operand1 / operand2)
                     }
+                }
+                else -> {
+
                 }
             }
         }

@@ -6,6 +6,8 @@ sealed class CalculatorDisplayItem(val displayStr: String) {
     object MultiplySymbol : CalculatorDisplayItem("x"), CalculatorOperator
     object DivisionSymbol : CalculatorDisplayItem("/"), CalculatorOperator
     data class Number(val num: String) : CalculatorDisplayItem(num), CalculatorOperand
+    object LeftParentheses : CalculatorDisplayItem("("), CalculatorParentheses
+    object RightParentheses: CalculatorDisplayItem(")"), CalculatorParentheses
 }
 
 sealed interface CalculatorOperand
@@ -13,3 +15,5 @@ sealed interface CalculatorOperand
 sealed interface CalculatorOperator
 
 sealed interface CalculatorSign
+
+sealed interface CalculatorParentheses
